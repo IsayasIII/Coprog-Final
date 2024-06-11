@@ -1,5 +1,7 @@
 package msja;
 
+
+
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
@@ -7,7 +9,7 @@ import java.util.HashMap;
 
 public class MSJA {
     public static void main(String[] args) {
-        MS ms = new MS();
+        new MS();
     }
 }
 
@@ -75,25 +77,60 @@ class MS extends JFrame implements ActionListener {
         gbc.gridy = 2;
         backgroundPanel.add(loginButton, gbc);
         loginButton.addActionListener(this);
+        loginButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                loginButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                loginButton.setBackground(null); // Change back to default color
+            }
+        });
 
         clearButton = new JButton("Clear");
         gbc.gridx = 1;
         gbc.gridy = 2;
         backgroundPanel.add(clearButton, gbc);
         clearButton.addActionListener(this);
+        clearButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                clearButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                clearButton.setBackground(null); // Change back to default color
+            }
+        });
 
         exitButton = new JButton("Exit");
         gbc.gridx = 0;
         gbc.gridy = 3;
         backgroundPanel.add(exitButton, gbc);
         exitButton.addActionListener(this);
+        exitButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                exitButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                exitButton.setBackground(null); // Change back to default color
+            }
+        });
 
         createButton = new JButton("Create");
         gbc.gridx = 1;
         gbc.gridy = 3;
         backgroundPanel.add(createButton, gbc);
         createButton.addActionListener(this);
+        createButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                createButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
 
+            public void mouseExited(MouseEvent e) {
+                createButton.setBackground(null); // Change back to default color
+            }
+        });
         setVisible(true);
     }
 
@@ -102,12 +139,12 @@ class MS extends JFrame implements ActionListener {
             String enteredPIN = new String(pinField.getPassword());
             if (enteredPIN.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter your PIN", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else if (enteredPIN.length() < 4) {
-                JOptionPane.showMessageDialog(this, "PIN should be at least 4 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else if (enteredPIN.length() < 6) {
+                JOptionPane.showMessageDialog(this, "PIN should be at least 6 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
             } else if (enteredPIN.equals(createdPIN)) {
                 // Check if createdFullName and createdChoice are not null
                 if (createdFullName != null && createdChoice != null) {
-                   new NewScreen(this, createdFullName, createdChoice);
+                    new NewScreen(this, createdFullName, createdChoice);
                     this.setVisible(false);
                     dispose();
                 } else {
@@ -174,7 +211,7 @@ class Screen extends JFrame implements ActionListener {
         gbc.gridx = 1;
         gbc.gridy = 2;
         add(confirmPinField, gbc);
-        
+
         phoneNumberLabel = new JLabel("Phone Number:");
         gbc.gridx = 0;
         gbc.gridy = 3;
@@ -200,13 +237,30 @@ class Screen extends JFrame implements ActionListener {
         gbc.gridy = 5;
         add(createButton, gbc);
         createButton.addActionListener(this);
+        createButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                createButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                createButton.setBackground(null); // Change back to default color
+            }
+        });
 
         backButton = new JButton("Back");
         gbc.gridx = 1;
         gbc.gridy = 5;
         add(backButton, gbc);
         backButton.addActionListener(this);
+        backButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                backButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
 
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(null); // Change back to default color
+            }
+        });
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -223,8 +277,8 @@ class Screen extends JFrame implements ActionListener {
 
             if (fullName.isEmpty() || pin.isEmpty() || confirmPin.isEmpty() || phoneNumber.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else if (pin.length() < 4) {
-                JOptionPane.showMessageDialog(this, "PIN should be at least 4 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
+            } else if (pin.length() < 6) {
+                JOptionPane.showMessageDialog(this, "PIN should be at least 6 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
             } else if (!pin.equals(confirmPin)) {
                 JOptionPane.showMessageDialog(this, "PINs do not match", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
@@ -247,6 +301,7 @@ class NewScreen extends JFrame implements ActionListener {
     MS login;
     String fullName;
     String choice;
+    JButton withdrawButton, depositButton, balanceButton, historyButton;
 
     public NewScreen(MS login, String fullName, String choice) {
         this.login = login;
@@ -258,53 +313,144 @@ class NewScreen extends JFrame implements ActionListener {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.CENTER;
 
-        JLabel welcomeMessage = new JLabel("Welcome, " + fullName + "! You are logged in.");
+        withdrawButton = new JButton("Withdraw");
         gbc.gridx = 0;
         gbc.gridy = 0;
-        add(welcomeMessage, gbc);
-
-        JLabel choiceLabel = new JLabel("Your choice is: " + choice);
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(choiceLabel, gbc);
-
-        JButton withdrawButton = new JButton("Withdraw");
-        gbc.gridx = 0;
-        gbc.gridy = 2;
         add(withdrawButton, gbc);
         withdrawButton.addActionListener(this);
+        withdrawButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                withdrawButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
 
-        JButton depositButton = new JButton("Deposit");
-        gbc.gridx = 0;
-        gbc.gridy = 3;
+            public void mouseExited(MouseEvent e) {
+                withdrawButton.setBackground(null); // Change back to default color
+            }
+        });
+
+        depositButton = new JButton("Deposit");
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         add(depositButton, gbc);
         depositButton.addActionListener(this);
+        depositButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                depositButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
 
-        JButton balanceButton = new JButton("Balance");
+            public void mouseExited(MouseEvent e) {
+                depositButton.setBackground(null); // Change back to default color
+            }
+        });
+
+        balanceButton = new JButton("Balance");
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 1;
         add(balanceButton, gbc);
         balanceButton.addActionListener(this);
+        balanceButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                balanceButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
 
-        JButton historyButton = new JButton("Transaction History");
-        gbc.gridx = 0;
-        gbc.gridy = 5;
+            public void mouseExited(MouseEvent e) {
+                balanceButton.setBackground(null); // Change back to default color
+            }
+        });
+
+        historyButton = new JButton("Transaction History");
+        gbc.gridx = 1;
+        gbc.gridy = 1;
         add(historyButton, gbc);
         historyButton.addActionListener(this);
+        historyButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                historyButton.setBackground(Color.YELLOW); // Change to highlight color
+            }
 
-        setSize(300, 300);
+            public void mouseExited(MouseEvent e) {
+                historyButton.setBackground(null); // Change back to default color
+            }
+        });
+
+        setSize(300, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
     public void actionPerformed(ActionEvent e) {
-        // Perform actions based on button clicks
-        // For example:
-        // if (e.getSource() == withdrawButton) {
-        //     // Code to perform withdraw action
-        // }
-        // Implement actions according to your application's logic
+        if (e.getSource() == withdrawButton) {
+            new WithdrawScreen(this);
+            this.setVisible(false);
+        }else if (e.getSource() == depositButton) {
+            new depositScreen(this);
+            this.setVisible(false);
+        }else if (e.getSource() == balanceButton) {
+            new balanceScreen(this);
+            this.setVisible(false);
+        
+        }else if (e.getSource() ==  historyButton) {
+            new historyScreen(this);
+            this.setVisible(false);
+        
+        }
     }
 }
+class WithdrawScreen extends JFrame implements ActionListener {// tanong mo lng kay chatbox basta ito ilalagay kona
+    
+    NewScreen withdraw;
+
+    public WithdrawScreen(NewScreen withdraw) {
+        
+    }
+
+  
+    public void actionPerformed(ActionEvent e) {
+        
+    }
+    }
+
+class depositScreen extends JFrame implements ActionListener {
+    
+    NewScreen deposit;
+
+    public depositScreen(NewScreen deposit) {
+        
+    }
+
+  
+    public void actionPerformed(ActionEvent e) {
+        
+    }
+}
+
+class balanceScreen extends JFrame implements ActionListener {
+    
+    NewScreen deposit;
+
+    public balanceScreen(NewScreen balance) {
+        
+    }
+
+  
+    public void actionPerformed(ActionEvent e) {
+        
+    }
+    }
+
+class historyScreen extends JFrame implements ActionListener {
+    
+    NewScreen history;
+
+    public historyScreen(NewScreen history) {
+        
+    }
+
+  
+    public void actionPerformed(ActionEvent e) {
+        
+    }
+    }
+
 
