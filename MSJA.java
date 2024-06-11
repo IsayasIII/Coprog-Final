@@ -397,20 +397,58 @@ class NewScreen extends JFrame implements ActionListener {
         }
     }
 }
-class WithdrawScreen extends JFrame implements ActionListener {// tanong mo lng kay chatbox basta ito ilalagay kona
+
+class WithdrawScreen extends JFrame implements ActionListener {
+    JLabel balanceLabel;
+    JButton withdrawButton;
+    JTextField withdrawAmountField;
+    double balance = 0.0;
+    NewScreen mainScreen;
     
-    NewScreen withdraw;
-
-    public WithdrawScreen(NewScreen withdraw) {
+    public WithdrawScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
+        this.balance = mainScreen.balance; // inherit balance from mainScreen
         
+        setTitle("Withdraw Cash");
+        setLayout(new FlowLayout());
+        
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
+        add(balanceLabel);
+        
+        withdrawButton = new JButton("Withdraw");
+        withdrawButton.addActionListener(this);
+        add(withdrawButton);
+        
+        withdrawAmountField = new JTextField(10);
+        add(withdrawAmountField);
+        
+        setSize(300, 100);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
     }
-
-  
+    
+    @Override
     public void actionPerformed(ActionEvent e) {
-        
+        if (e.getSource() == withdrawButton) {
+            try {
+                double withdrawAmount = Double.parseDouble(withdrawAmountField.getText());
+                if (withdrawAmount <= 0) {
+                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
+                } else if (withdrawAmount > balance) {
+                    JOptionPane.showMessageDialog(this, "Insufficient funds.");
+                } else {
+                    balance -= withdrawAmount;
+                    balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
+                    mainScreen.balance = balance; // update mainScreen balance
+                    this.dispose(); // close this window
+                    mainScreen.setVisible(true); // show mainScreen
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
+            }
+        }
     }
-    }
-
+}
 class depositScreen extends JFrame implements ActionListener {
     
     NewScreen deposit;
