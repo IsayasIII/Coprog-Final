@@ -449,33 +449,74 @@ class WithdrawScreen extends JFrame implements ActionListener {
         }
     }
 }
-class depositScreen extends JFrame implements ActionListener {
+class DepositScreen extends JFrame implements ActionListener {
+    JLabel balanceLabel;
+    JButton depositButton;
+    JTextField depositAmountField;
+    double balance = 0.0;
+    NewScreen mainScreen;
     
-    NewScreen deposit;
-
-    public depositScreen(NewScreen deposit) {
+    public DepositScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
+        this.balance = mainScreen.balance; // inherit balance from mainScreen
         
+        setTitle("Deposit Cash");
+        setLayout(new FlowLayout());
+        
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
+        add(balanceLabel);
+        
+        depositButton = new JButton("Deposit");
+        depositButton.addActionListener(this);
+        add(depositButton);
+        
+        depositAmountField = new JTextField(10);
+        add(depositAmountField);
+        
+        setSize(300, 100);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
     }
-
-  
+    
+    @Override
     public void actionPerformed(ActionEvent e) {
-        
+        if (e.getSource() == depositButton) {
+            try {
+                double depositAmount = Double.parseDouble(depositAmountField.getText());
+                if (depositAmount <= 0) {
+                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
+                } else {
+                    balance += depositAmount;
+                    balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
+                    mainScreen.balance = balance; // update mainScreen balance
+                    this.dispose(); // close this window
+                    mainScreen.setVisible(true); // show mainScreen
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
+            }
+        }
     }
 }
 
-class balanceScreen extends JFrame implements ActionListener {
+class BalanceScreen extends JFrame {
+    JLabel balanceLabel;
+    NewScreen mainScreen;
     
-    NewScreen deposit;
-
-    public balanceScreen(NewScreen balance) {
+    public BalanceScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
         
-    }
-
-  
-    public void actionPerformed(ActionEvent e) {
+        setTitle("Check Balance");
+        setLayout(new FlowLayout());
         
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", mainScreen.balance));
+        add(balanceLabel);
+        
+        setSize(300, 100);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
     }
-    }
+}
 
 class historyScreen extends JFrame implements ActionListener {
     
