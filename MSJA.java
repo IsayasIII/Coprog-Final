@@ -1,7 +1,12 @@
 package msja;
 
-
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
@@ -10,6 +15,26 @@ import java.util.HashMap;
 public class MSJA {
     public static void main(String[] args) {
         new MS();
+    }     
+}
+
+public class Data{
+    ArrayList<String> names = new ArrayList<>();
+    ArrayList<String> pins = new ArrayList<>();
+    ArrayList<Integer> ballance = new ArrayList<>();
+    
+    public void addAcc(String fullName, String pin){
+        names.add(fullName);
+        pins.add(pin);
+    }
+
+    public void writeFile(){
+        Path path = Paths.get("arrayList.txt");
+        try {
+            Files.write(path, names.stream().map(String::valueOf).collect(Collectors.toList()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
@@ -23,6 +48,7 @@ class MS extends JFrame implements ActionListener {
     String createdFullName;
     String createdPhoneNumber;
     String createdChoice;
+    Double balance;
 
     JPanel backgroundPanel;
     private static HashMap<String, String> accounts = new HashMap<>();
@@ -286,6 +312,10 @@ class Screen extends JFrame implements ActionListener {
                 mainScreen.createdPIN = pin;
                 mainScreen.createdPhoneNumber = phoneNumber;
                 mainScreen.createdChoice = choice;
+                
+                Data obj = new Data();
+                obj.addAcc(fullName, pin);
+                
                 JOptionPane.showMessageDialog(this, "Account created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 mainScreen.setVisible(true);
                 this.dispose();
@@ -449,36 +479,21 @@ class WithdrawScreen extends JFrame implements ActionListener {
         }
     }
 }
-class DepositScreen extends JFrame implements ActionListener {
-    JLabel balanceLabel;
+class depositScreen extends JFrame implements ActionListener {
+    NewScreen deposit;
     JButton depositButton;
     JTextField depositAmountField;
-    double balance = 0.0;
-    NewScreen mainScreen;
-    
-    public DepositScreen(NewScreen mainScreen) {
-        this.mainScreen = mainScreen;
-        this.balance = mainScreen.balance; // inherit balance from mainScreen
-        
-        setTitle("Deposit Cash");
-        setLayout(new FlowLayout());
-        
-        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
-        add(balanceLabel);
-        
+
+    public depositScreen(NewScreen deposit) {
+        this.deposit = deposit;
+        // ...
         depositButton = new JButton("Deposit");
-        depositButton.addActionListener(this);
         add(depositButton);
-        
+        depositButton.addActionListener(this);
         depositAmountField = new JTextField(10);
         add(depositAmountField);
-        
-        setSize(300, 100);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setVisible(true);
     }
-    
-    @Override
+
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == depositButton) {
             try {
@@ -486,11 +501,8 @@ class DepositScreen extends JFrame implements ActionListener {
                 if (depositAmount <= 0) {
                     JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
                 } else {
-                    balance += depositAmount;
-                    balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
-                    mainScreen.balance = balance; // update mainScreen balance
-                    this.dispose(); // close this window
-                    mainScreen.setVisible(true); // show mainScreen
+                    deposit.balance += depositAmount;
+                    // ...
                 }
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
@@ -499,11 +511,11 @@ class DepositScreen extends JFrame implements ActionListener {
     }
 }
 
-class BalanceScreen extends JFrame {
+class balanceScreen extends JFrame {
     JLabel balanceLabel;
     NewScreen mainScreen;
     
-    public BalanceScreen(NewScreen mainScreen) {
+    public balanceScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
         
         setTitle("Check Balance");
