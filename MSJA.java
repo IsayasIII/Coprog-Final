@@ -4,8 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
@@ -17,11 +15,23 @@ public class MSJA {
 }
 
 class Data {
-    int i = 0;
+    private static Data instance;
+    int i = -1;
     ArrayList<String> names = new ArrayList<>();
     ArrayList<String> pins = new ArrayList<>();
     ArrayList<String> choice = new ArrayList<>();
     ArrayList<Double> balance = new ArrayList<>();
+
+    private Data() {
+        // Private constructor to enforce Singleton pattern
+    }
+
+    public static Data getInstance() {
+        if (instance == null) {
+            instance = new Data();
+        }
+        return instance;
+    }
 
     public void writeFile() {
         try (FileWriter writer = new FileWriter("C:\\Users\\isaya\\Desktop\\arrayList.txt")) {
@@ -44,19 +54,14 @@ class Data {
         }
     }
 
-    public void addAcc(){
-        MS o=new MS();
-        Screen sc=new Screen(o);
-
-        pins.add(sc.pin);
-        System.out.println(sc.pin);
-        names.add(sc.fullName);
+    public void addAcc(String fullName, String pin, String choice) {
+        names.add(fullName);
+        pins.add(pin);
         balance.add(0.0);
-        choice.add(sc.choice);
-
-        }
-
+        this.choice.add(choice);
+        i = names.size() - 1;
     }
+}
 
 class MS extends JFrame implements ActionListener {
     JLabel welcomeLabel, pinLabel;
@@ -175,32 +180,19 @@ class MS extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == loginButton) {
             String enteredPIN = new String(pinField.getPassword());
+            Data data = Data.getInstance();
+
             if (enteredPIN.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please enter your PIN", "Warning", JOptionPane.WARNING_MESSAGE);
             } else if (enteredPIN.length() < 6) {
                 JOptionPane.showMessageDialog(this, "PIN should be at least 6 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
             } else {
-                // auth process
-                Data obj = new Data();
-                Boolean auth = false;
-
-                for (String pin : obj.pins) {
-                    if (enteredPIN.equals(pin)) {
-                    auth = true;
-                    break;
-                    }
-                }
-
-                if (auth == true) {
-                    // Check if createdFullName and createdChoice are not null
-                    if (obj.names.get(obj.i)!= null && obj.choice.get(obj.i)!= null) {
-                        new NewScreen(this, obj.names.get(obj.i), obj.choice.get(obj.i));
-                        this.setVisible(false);
-                        dispose();
-                    } else {
-                        // Handle the case where createdFullName or createdChoice is null
-                        JOptionPane.showMessageDialog(this, "Account information missing", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
+                int pinIndex = data.pins.indexOf(enteredPIN);
+                if (pinIndex != -1) {
+                    data.i = pinIndex;
+                    new NewScreen(this, data.names.get(data.i), data.choice.get(data.i));
+                    this.setVisible(false);
+                    dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "Invalid PIN!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -228,7 +220,6 @@ class Screen extends JFrame implements ActionListener {
     String confirmPin;
     String phoneNumber;
     String choice;
-    Data obj = new Data();
 
     public Screen(MS mainScreen) {
         this.mainScreen = mainScreen;
@@ -339,11 +330,9 @@ class Screen extends JFrame implements ActionListener {
             } else if (!pin.equals(confirmPin)) {
                 JOptionPane.showMessageDialog(this, "PINs do not match", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                
-                obj.addAcc();
-                System.out.println(pin);
-                obj.writeFile();
-                System.out.println(obj.pins);
+                Data data = Data.getInstance();
+                data.addAcc(fullName, pin, choice);
+                data.writeFile();
 
                 JOptionPane.showMessageDialog(this, "Account created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 mainScreen.setVisible(true);
