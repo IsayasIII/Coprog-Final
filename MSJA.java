@@ -1,55 +1,67 @@
 package msja;
 
+import java.awt.*;
+import java.awt.event.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
 import java.util.HashMap;
+import javax.swing.*;
 
 public class MSJA {
     public static void main(String[] args) {
         new MS();
-    }     
+    }
 }
 
-public class Data{
+class Data {
+    int i = 0;
     ArrayList<String> names = new ArrayList<>();
     ArrayList<String> pins = new ArrayList<>();
-    ArrayList<Integer> ballance = new ArrayList<>();
-    
-    public void addAcc(String fullName, String pin){
-        names.add(fullName);
-        pins.add(pin);
-    }
+    ArrayList<String> choice = new ArrayList<>();
+    ArrayList<Double> balance = new ArrayList<>();
 
-    public void writeFile(){
-        Path path = Paths.get("arrayList.txt");
-        try {
-            Files.write(path, names.stream().map(String::valueOf).collect(Collectors.toList()));
+    public void writeFile() {
+        try (FileWriter writer = new FileWriter("C:\\Users\\isaya\\Desktop\\arrayList.txt")) {
+            writer.write("Names :\n");
+            for (String item : names) {
+                writer.write(item + "\n");
+            }
+
+            writer.write("\nPins :\n");
+            for (String item : pins) {
+                writer.write(item + "\n");
+            }
+
+            writer.write("\nBalance :\n");
+            for (Double item : balance) {
+                writer.write(item + "\n");
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error writing to file: " + e.getMessage());
         }
     }
-}
+
+    public void addAcc(){
+        MS o=new MS();
+        Screen sc=new Screen(o);
+
+        pins.add(sc.pin);
+        System.out.println(sc.pin);
+        names.add(sc.fullName);
+        balance.add(0.0);
+        choice.add(sc.choice);
+
+        }
+
+    }
 
 class MS extends JFrame implements ActionListener {
-
     JLabel welcomeLabel, pinLabel;
     JPasswordField pinField;
     JButton loginButton, clearButton, exitButton, createButton;
-
-    String createdPIN;
-    String createdFullName;
-    String createdPhoneNumber;
-    String createdChoice;
-    Double balance;
-
     JPanel backgroundPanel;
     private static HashMap<String, String> accounts = new HashMap<>();
 
@@ -156,7 +168,7 @@ class MS extends JFrame implements ActionListener {
             public void mouseExited(MouseEvent e) {
                 createButton.setBackground(null); // Change back to default color
             }
-        });
+       });
         setVisible(true);
     }
 
@@ -167,18 +179,31 @@ class MS extends JFrame implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Please enter your PIN", "Warning", JOptionPane.WARNING_MESSAGE);
             } else if (enteredPIN.length() < 6) {
                 JOptionPane.showMessageDialog(this, "PIN should be at least 6 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else if (enteredPIN.equals(createdPIN)) {
-                // Check if createdFullName and createdChoice are not null
-                if (createdFullName != null && createdChoice != null) {
-                    new NewScreen(this, createdFullName, createdChoice);
-                    this.setVisible(false);
-                    dispose();
-                } else {
-                    // Handle the case where createdFullName or createdChoice is null
-                    JOptionPane.showMessageDialog(this, "Account information missing", "Error", JOptionPane.ERROR_MESSAGE);
-                }
             } else {
-                JOptionPane.showMessageDialog(this, "Invalid PIN!", "Error", JOptionPane.ERROR_MESSAGE);
+                // auth process
+                Data obj = new Data();
+                Boolean auth = false;
+
+                for (String pin : obj.pins) {
+                    if (enteredPIN.equals(pin)) {
+                    auth = true;
+                    break;
+                    }
+                }
+
+                if (auth == true) {
+                    // Check if createdFullName and createdChoice are not null
+                    if (obj.names.get(obj.i)!= null && obj.choice.get(obj.i)!= null) {
+                        new NewScreen(this, obj.names.get(obj.i), obj.choice.get(obj.i));
+                        this.setVisible(false);
+                        dispose();
+                    } else {
+                        // Handle the case where createdFullName or createdChoice is null
+                        JOptionPane.showMessageDialog(this, "Account information missing", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(this, "Invalid PIN!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         } else if (e.getSource() == clearButton) {
             pinField.setText("");
@@ -198,6 +223,12 @@ class Screen extends JFrame implements ActionListener {
     JComboBox<String> choiceBox;
     JButton createButton, backButton;
     MS mainScreen;
+    String fullName;
+    String pin;
+    String confirmPin;
+    String phoneNumber;
+    String choice;
+    Data obj = new Data();
 
     public Screen(MS mainScreen) {
         this.mainScreen = mainScreen;
@@ -295,11 +326,11 @@ class Screen extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == createButton) {
-            String fullName = fullNameField.getText();
-            String pin = new String(pinField.getPassword());
-            String confirmPin = new String(confirmPinField.getPassword());
-            String phoneNumber = phoneNumberField.getText();
-            String choice = (String) choiceBox.getSelectedItem();
+            fullName = fullNameField.getText();
+            pin = new String(pinField.getPassword());
+            confirmPin = new String(confirmPinField.getPassword());
+            phoneNumber = phoneNumberField.getText();
+            choice = (String) choiceBox.getSelectedItem();
 
             if (fullName.isEmpty() || pin.isEmpty() || confirmPin.isEmpty() || phoneNumber.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please fill in all fields", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -308,14 +339,12 @@ class Screen extends JFrame implements ActionListener {
             } else if (!pin.equals(confirmPin)) {
                 JOptionPane.showMessageDialog(this, "PINs do not match", "Error", JOptionPane.ERROR_MESSAGE);
             } else {
-                mainScreen.createdFullName = fullName;
-                mainScreen.createdPIN = pin;
-                mainScreen.createdPhoneNumber = phoneNumber;
-                mainScreen.createdChoice = choice;
                 
-                Data obj = new Data();
-                obj.addAcc(fullName, pin);
-                
+                obj.addAcc();
+                System.out.println(pin);
+                obj.writeFile();
+                System.out.println(obj.pins);
+
                 JOptionPane.showMessageDialog(this, "Account created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 mainScreen.setVisible(true);
                 this.dispose();
@@ -410,138 +439,6 @@ class NewScreen extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == withdrawButton) {
-            new WithdrawScreen(this);
-            this.setVisible(false);
-        }else if (e.getSource() == depositButton) {
-            new depositScreen(this);
-            this.setVisible(false);
-        }else if (e.getSource() == balanceButton) {
-            new balanceScreen(this);
-            this.setVisible(false);
-        
-        }else if (e.getSource() ==  historyButton) {
-            new historyScreen(this);
-            this.setVisible(false);
-        
-        }
+        // Implement actions for buttons
     }
 }
-
-class WithdrawScreen extends JFrame implements ActionListener {
-    JLabel balanceLabel;
-    JButton withdrawButton;
-    JTextField withdrawAmountField;
-    double balance = 0.0;
-    NewScreen mainScreen;
-    
-    public WithdrawScreen(NewScreen mainScreen) {
-        this.mainScreen = mainScreen;
-        this.balance = mainScreen.balance; // inherit balance from mainScreen
-        
-        setTitle("Withdraw Cash");
-        setLayout(new FlowLayout());
-        
-        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
-        add(balanceLabel);
-        
-        withdrawButton = new JButton("Withdraw");
-        withdrawButton.addActionListener(this);
-        add(withdrawButton);
-        
-        withdrawAmountField = new JTextField(10);
-        add(withdrawAmountField);
-        
-        setSize(300, 100);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setVisible(true);
-    }
-    
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == withdrawButton) {
-            try {
-                double withdrawAmount = Double.parseDouble(withdrawAmountField.getText());
-                if (withdrawAmount <= 0) {
-                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
-                } else if (withdrawAmount > balance) {
-                    JOptionPane.showMessageDialog(this, "Insufficient funds.");
-                } else {
-                    balance -= withdrawAmount;
-                    balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
-                    mainScreen.balance = balance; // update mainScreen balance
-                    this.dispose(); // close this window
-                    mainScreen.setVisible(true); // show mainScreen
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
-            }
-        }
-    }
-}
-class depositScreen extends JFrame implements ActionListener {
-    NewScreen deposit;
-    JButton depositButton;
-    JTextField depositAmountField;
-
-    public depositScreen(NewScreen deposit) {
-        this.deposit = deposit;
-        // ...
-        depositButton = new JButton("Deposit");
-        add(depositButton);
-        depositButton.addActionListener(this);
-        depositAmountField = new JTextField(10);
-        add(depositAmountField);
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == depositButton) {
-            try {
-                double depositAmount = Double.parseDouble(depositAmountField.getText());
-                if (depositAmount <= 0) {
-                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
-                } else {
-                    deposit.balance += depositAmount;
-                    // ...
-                }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
-            }
-        }
-    }
-}
-
-class balanceScreen extends JFrame {
-    JLabel balanceLabel;
-    NewScreen mainScreen;
-    
-    public balanceScreen(NewScreen mainScreen) {
-        this.mainScreen = mainScreen;
-        
-        setTitle("Check Balance");
-        setLayout(new FlowLayout());
-        
-        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", mainScreen.balance));
-        add(balanceLabel);
-        
-        setSize(300, 100);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setVisible(true);
-    }
-}
-
-class historyScreen extends JFrame implements ActionListener {
-    
-    NewScreen history;
-
-    public historyScreen(NewScreen history) {
-        
-    }
-
-  
-    public void actionPerformed(ActionEvent e) {
-        
-    }
-    }
-
-
