@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.*;
 
-public class MSJA {
+public class MSJA1 {
     public static void main(String[] args) {
         new MS();
     }
@@ -429,5 +429,154 @@ class NewScreen extends JFrame implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         // Implement actions for buttons
+        if (e.getSource() == withdrawButton) {
+            new WithdrawScreen(this);
+            this.setVisible(false);
+        }else if (e.getSource() == depositButton) {
+            new depositScreen(this);
+            this.setVisible(false);
+        }else if (e.getSource() == balanceButton) {
+            new balanceScreen(this);
+            this.setVisible(false);
+        
+        }else if (e.getSource() ==  historyButton) {
+            new historyScreen(this);
+            this.setVisible(false);
+        
+        }
     }
 }
+class WithdrawScreen extends JFrame implements ActionListener {
+    JLabel balanceLabel;
+    JButton withdrawButton;
+    JTextField withdrawAmountField;
+    double balance = 0.0;
+    NewScreen mainScreen;
+    Data data =Data.getInstance();
+    
+    
+    public WithdrawScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
+        this.balance = data.balance.get(data.i); // inherit balance from mainScreen
+        
+        setTitle("Withdraw Cash");
+        setLayout(new FlowLayout());
+        
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
+        add(balanceLabel);
+        
+        withdrawButton = new JButton("Withdraw");
+        withdrawButton.addActionListener(this);
+        add(withdrawButton);
+        
+        withdrawAmountField = new JTextField(10);
+        add(withdrawAmountField);
+        
+        setSize(300, 100);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == withdrawButton) {
+            try {
+                double withdrawAmount = Double.parseDouble(withdrawAmountField.getText());
+                if (withdrawAmount <= 0) {
+                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
+                } else if (withdrawAmount > balance) {
+                    JOptionPane.showMessageDialog(this, "Insufficient funds.");
+                } else {
+                    balance -= withdrawAmount;
+                    balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
+                    data.balance.set(data.i,balance); // update mainScreen balance
+                    this.dispose(); // close this window
+                    mainScreen.setVisible(true); // show mainScreen
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
+            }
+        }
+    }
+}
+class depositScreen extends JFrame implements ActionListener {
+    JLabel balanceLabel;
+    JButton depositButton;
+    JTextField depositAmountField;
+    NewScreen mainScreen;
+    Data data = Data.getInstance();
+
+    public depositScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
+
+        setTitle("Deposit Cash");
+        setLayout(new FlowLayout());
+
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
+        add(balanceLabel);
+
+        depositButton = new JButton("Deposit");
+        depositButton.addActionListener(this);
+        add(depositButton);
+
+        depositAmountField = new JTextField(10);
+        add(depositAmountField);
+
+        setSize(300, 100);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == depositButton) {
+            try {
+                double depositAmount = Double.parseDouble(depositAmountField.getText());
+                if (depositAmount <= 0) {
+                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
+                } else {
+                    data.balance.set(data.i, data.balance.get(data.i) + depositAmount);// update mainScreen balance
+                    balanceLabel.setText("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
+                    this.dispose(); // close this window
+                    mainScreen.setVisible(true); // show mainScreen
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
+            }
+        }
+    }
+}
+
+class balanceScreen extends JFrame {
+    JLabel balanceLabel;
+    NewScreen mainScreen;
+    Data data = Data.getInstance();
+
+    public balanceScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
+
+        setTitle("Check Balance");
+        setLayout(new FlowLayout());
+
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", data.balance));
+        add(balanceLabel);
+
+        setSize(300, 100);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
+    }
+}
+
+class historyScreen extends JFrame implements ActionListener {
+
+    NewScreen history;
+    public historyScreen(NewScreen history) {
+        
+    }
+  
+    public void actionPerformed(ActionEvent e) {
+        
+    }
+}
+    
+
