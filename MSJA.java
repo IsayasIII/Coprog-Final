@@ -1,4 +1,5 @@
-package msja;
+
+package last.na.to.yawa;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -173,7 +174,8 @@ class MS extends JFrame implements ActionListener {
             public void mouseExited(MouseEvent e) {
                 createButton.setBackground(null); // Change back to default color
             }
-       });
+        });
+
         setVisible(true);
     }
 
@@ -309,10 +311,11 @@ class Screen extends JFrame implements ActionListener {
                 backButton.setBackground(null); // Change back to default color
             }
         });
+
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setVisible(true);
+        setVisible (true);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -428,55 +431,52 @@ class NewScreen extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        // Implement actions for buttons
         if (e.getSource() == withdrawButton) {
             new WithdrawScreen(this);
             this.setVisible(false);
-        }else if (e.getSource() == depositButton) {
-            new depositScreen(this);
+        } else if (e.getSource() == depositButton) {
+            new DepositScreen(this);
             this.setVisible(false);
-        }else if (e.getSource() == balanceButton) {
-            new balanceScreen(this);
+        } else if (e.getSource() == balanceButton) {
+            new BalanceScreen(this);
             this.setVisible(false);
-        
-        }else if (e.getSource() ==  historyButton) {
-            new historyScreen(this);
+        } else if (e.getSource() == historyButton) {
+            new HistoryScreen(this);
             this.setVisible(false);
-        
         }
     }
 }
+
 class WithdrawScreen extends JFrame implements ActionListener {
     JLabel balanceLabel;
     JButton withdrawButton;
     JTextField withdrawAmountField;
     double balance = 0.0;
     NewScreen mainScreen;
-    Data data =Data.getInstance();
-    
-    
+    Data data = Data.getInstance();
+
     public WithdrawScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
         this.balance = data.balance.get(data.i); // inherit balance from mainScreen
-        
+
         setTitle("Withdraw Cash");
         setLayout(new FlowLayout());
-        
+
         balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
         add(balanceLabel);
-        
+
         withdrawButton = new JButton("Withdraw");
         withdrawButton.addActionListener(this);
         add(withdrawButton);
-        
+
         withdrawAmountField = new JTextField(10);
         add(withdrawAmountField);
-        
+
         setSize(300, 100);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == withdrawButton) {
@@ -489,7 +489,7 @@ class WithdrawScreen extends JFrame implements ActionListener {
                 } else {
                     balance -= withdrawAmount;
                     balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
-                    data.balance.set(data.i,balance); // update mainScreen balance
+                    data.balance.set(data.i, balance); // update mainScreen balance
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
                 }
@@ -499,14 +499,15 @@ class WithdrawScreen extends JFrame implements ActionListener {
         }
     }
 }
-class depositScreen extends JFrame implements ActionListener {
+
+class DepositScreen extends JFrame implements ActionListener {
     JLabel balanceLabel;
     JButton depositButton;
     JTextField depositAmountField;
     NewScreen mainScreen;
     Data data = Data.getInstance();
 
-    public depositScreen(NewScreen mainScreen) {
+    public DepositScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
 
         setTitle("Deposit Cash");
@@ -526,7 +527,7 @@ class depositScreen extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == depositButton) {
@@ -535,7 +536,7 @@ class depositScreen extends JFrame implements ActionListener {
                 if (depositAmount <= 0) {
                     JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
                 } else {
-                    data.balance.set(data.i, data.balance.get(data.i) + depositAmount);// update mainScreen balance
+                    data.balance.set(data.i, data.balance.get(data.i) + depositAmount); // update mainScreen balance
                     balanceLabel.setText("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
@@ -547,18 +548,18 @@ class depositScreen extends JFrame implements ActionListener {
     }
 }
 
-class balanceScreen extends JFrame {
+class BalanceScreen extends JFrame {
     JLabel balanceLabel;
     NewScreen mainScreen;
     Data data = Data.getInstance();
 
-    public balanceScreen(NewScreen mainScreen) {
+    public BalanceScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
 
         setTitle("Check Balance");
         setLayout(new FlowLayout());
 
-        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", data.balance));
+        balanceLabel = new JLabel("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
         add(balanceLabel);
 
         setSize(300, 100);
@@ -567,16 +568,18 @@ class balanceScreen extends JFrame {
     }
 }
 
-class historyScreen extends JFrame implements ActionListener {
+class HistoryScreen extends JFrame {
+    NewScreen mainScreen;
 
-    NewScreen history;
-    public historyScreen(NewScreen history) {
-        
-    }
-  
-    public void actionPerformed(ActionEvent e) {
-        
+    public HistoryScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
+
+        setTitle("Transaction History");
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setVisible(true);
     }
 }
+
     
 
