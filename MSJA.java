@@ -54,6 +54,7 @@ class Data {
             System.err.println("Error writing to file: " + e.getMessage());
         }
     }
+    
 
     public void addAcc(String fullName, String pin, String choice) {
         names.add(fullName);
