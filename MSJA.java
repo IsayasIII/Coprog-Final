@@ -1,15 +1,18 @@
-
-package last.na.to.yawa;
+package msja;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.List;
 import java.util.HashMap;
 import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
-public class MSJA1 {
+public class MSJA {
     public static void main(String[] args) {
         new MS();
     }
@@ -17,11 +20,12 @@ public class MSJA1 {
 
 class Data {
     private static Data instance;
-    int i = -1;
+    int i = 0;
     ArrayList<String> names = new ArrayList<>();
     ArrayList<String> pins = new ArrayList<>();
     ArrayList<String> choice = new ArrayList<>();
     ArrayList<Double> balance = new ArrayList<>();
+    ArrayList<String> transactionHistory = new ArrayList<>();
 
     private Data() {
         // Private constructor to enforce Singleton pattern
@@ -35,26 +39,81 @@ class Data {
     }
 
     public void writeFile() {
-        try (FileWriter writer = new FileWriter("C:\\Users\\isaya\\Desktop\\arrayList.txt")) {
-            writer.write("Names :\n");
-            for (String item : names) {
-                writer.write(item + "\n");
-            }
-
-            writer.write("\nPins :\n");
-            for (String item : pins) {
-                writer.write(item + "\n");
-            }
-
-            writer.write("\nBalance :\n");
-            for (Double item : balance) {
-                writer.write(item + "\n");
-            }
-        } catch (IOException e) {
-            System.err.println("Error writing to file: " + e.getMessage());
+    try (FileWriter writer = new FileWriter("Data.txt")) {
+        writer.write("Names :\n");
+        for (String item : names) {
+            writer.write(item + "\n");
         }
+
+        writer.write("\nPins :\n");
+        for (String item : pins) {
+            writer.write(item + "\n");
+        }
+
+        writer.write("\nBalance :\n");
+        for (Double item : balance) {
+            writer.write(item + "\n");
+        }
+
+        writer.write("\nChoice :\n");
+        for (String item : choice) {
+            writer.write(item + "\n");
+        }
+    } catch (IOException e) {
+        System.err.println("Error writing to file: " + e.getMessage());
     }
-    
+}
+
+public void readFile() {
+    try (BufferedReader reader = new BufferedReader(new FileReader("Data.txt"))) {
+        String line;
+        boolean readingNames = true;
+        boolean readingPins = false;
+        boolean readingBalance = false;
+        boolean readingChoice = false;
+
+        names.clear();
+        pins.clear();
+        balance.clear();
+        choice.clear();
+
+        while ((line = reader.readLine())!= null) {
+            if (line.equals("Names :")) {
+                readingNames = true;
+                readingPins = false;
+                readingBalance = false;
+                readingChoice = false;
+            } else if (line.equals("Pins :")) {
+                readingNames = false;
+                readingPins = true;
+                readingBalance = false;
+                readingChoice = false;
+            } else if (line.equals("Balance :")) {
+                readingNames = false;
+                readingPins = false;
+                readingBalance = true;
+                readingChoice = false;
+            } else if (line.equals("Choice :")) {
+                readingNames = false;
+                readingPins = false;
+                readingBalance = false;
+                readingChoice = true;
+            } else {
+                if (readingNames) {
+                    names.add(line);
+                } else if (readingPins) {
+                    pins.add(line);
+                } else if (readingBalance) {
+                    balance.add(Double.parseDouble(line));
+                } else if (readingChoice) {
+                    choice.add(line);
+                }
+            }
+        }
+    } catch (IOException e) {
+        System.err.println("Error reading from file: " + e.getMessage());
+    }
+}
 
     public void addAcc(String fullName, String pin, String choice) {
         names.add(fullName);
@@ -71,6 +130,8 @@ class MS extends JFrame implements ActionListener {
     JButton loginButton, clearButton, exitButton, createButton;
     JPanel backgroundPanel;
     private static HashMap<String, String> accounts = new HashMap<>();
+    Data data = Data.getInstance();
+    
 
     public MS() {
         // Custom panel for background
@@ -87,7 +148,6 @@ class MS extends JFrame implements ActionListener {
 
         backgroundPanel.setLayout(new GridBagLayout());
         setContentPane(backgroundPanel);
-
         // Set up the frame
         setTitle("MoneySafeGuard Application");
         setSize(400, 300);
@@ -175,40 +235,50 @@ class MS extends JFrame implements ActionListener {
             public void mouseExited(MouseEvent e) {
                 createButton.setBackground(null); // Change back to default color
             }
-        });
-
+       });
         setVisible(true);
+        data.readFile();
+        
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == loginButton) {
-            String enteredPIN = new String(pinField.getPassword());
-            Data data = Data.getInstance();
-
-            if (enteredPIN.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please enter your PIN", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else if (enteredPIN.length() < 6) {
-                JOptionPane.showMessageDialog(this, "PIN should be at least 6 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
-            } else {
-                int pinIndex = data.pins.indexOf(enteredPIN);
-                if (pinIndex != -1) {
-                    data.i = pinIndex;
-                    new NewScreen(this, data.names.get(data.i), data.choice.get(data.i));
-                    this.setVisible(false);
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Invalid PIN!", "Error", JOptionPane.ERROR_MESSAGE);
+    if (e.getSource() == loginButton) {
+        String enteredPIN = new String(pinField.getPassword());
+        if (enteredPIN.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your PIN", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else if (enteredPIN.length() < 6) {
+            JOptionPane.showMessageDialog(this, "PIN should be at least 6 digits long", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
+            if (!data.pins.isEmpty()) {
+                boolean pinFound = false;
+                for (int i = 0; i < data.pins.size(); i++) {
+                    if (data.pins.get(i).equals(enteredPIN)) {
+                        data.i = i;
+                        new NewScreen(this, data.names.get(i), data.choice.get(i));
+                        this.setVisible(false);
+                        dispose();
+                        pinFound = true;
+                        break; // exit the loop since we found a match
+                    }
                 }
+                if (!pinFound) {
+                    JOptionPane.showMessageDialog(this, "Invalid PIN", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                // Handle the case where the lists are empty
+                System.out.println("Database are empty!");
+                
             }
-        } else if (e.getSource() == clearButton) {
-            pinField.setText("");
-        } else if (e.getSource() == exitButton) {
-            System.exit(0);
-        } else if (e.getSource() == createButton) {
-            new Screen(this);
-            this.setVisible(false);
         }
+    } else if (e.getSource() == clearButton) {
+        pinField.setText("");
+    } else if (e.getSource() == exitButton) {
+        System.exit(0);
+    } else if (e.getSource() == createButton) {
+        new Screen(this);
+        this.setVisible(false);
     }
+}
 }
 
 class Screen extends JFrame implements ActionListener {
@@ -312,11 +382,10 @@ class Screen extends JFrame implements ActionListener {
                 backButton.setBackground(null); // Change back to default color
             }
         });
-
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setVisible (true);
+        setVisible(true);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -432,52 +501,55 @@ class NewScreen extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
+        // Implement actions for buttons
         if (e.getSource() == withdrawButton) {
             new WithdrawScreen(this);
             this.setVisible(false);
-        } else if (e.getSource() == depositButton) {
-            new DepositScreen(this);
+        }else if (e.getSource() == depositButton) {
+            new depositScreen(this);
             this.setVisible(false);
-        } else if (e.getSource() == balanceButton) {
-            new BalanceScreen(this);
+        }else if (e.getSource() == balanceButton) {
+            new balanceScreen(this);
             this.setVisible(false);
-        } else if (e.getSource() == historyButton) {
-            new HistoryScreen(this);
+        
+        }else if (e.getSource() ==  historyButton) {
+            new historyScreen(this);
             this.setVisible(false);
+        
         }
     }
 }
-
 class WithdrawScreen extends JFrame implements ActionListener {
     JLabel balanceLabel;
     JButton withdrawButton;
     JTextField withdrawAmountField;
     double balance = 0.0;
     NewScreen mainScreen;
-    Data data = Data.getInstance();
-
+    Data data =Data.getInstance();
+    
+    
     public WithdrawScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
         this.balance = data.balance.get(data.i); // inherit balance from mainScreen
-
+        
         setTitle("Withdraw Cash");
         setLayout(new FlowLayout());
-
+        
         balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
         add(balanceLabel);
-
+        
         withdrawButton = new JButton("Withdraw");
         withdrawButton.addActionListener(this);
         add(withdrawButton);
-
+        
         withdrawAmountField = new JTextField(10);
         add(withdrawAmountField);
-
+        
         setSize(300, 100);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
-
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == withdrawButton) {
@@ -490,7 +562,7 @@ class WithdrawScreen extends JFrame implements ActionListener {
                 } else {
                     balance -= withdrawAmount;
                     balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
-                    data.balance.set(data.i, balance); // update mainScreen balance
+                    data.balance.set(data.i,balance); // update mainScreen balance
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
                 }
@@ -500,15 +572,14 @@ class WithdrawScreen extends JFrame implements ActionListener {
         }
     }
 }
-
-class DepositScreen extends JFrame implements ActionListener {
+class depositScreen extends JFrame implements ActionListener {
     JLabel balanceLabel;
     JButton depositButton;
     JTextField depositAmountField;
     NewScreen mainScreen;
     Data data = Data.getInstance();
 
-    public DepositScreen(NewScreen mainScreen) {
+    public depositScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
 
         setTitle("Deposit Cash");
@@ -528,7 +599,7 @@ class DepositScreen extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
-
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == depositButton) {
@@ -537,7 +608,7 @@ class DepositScreen extends JFrame implements ActionListener {
                 if (depositAmount <= 0) {
                     JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
                 } else {
-                    data.balance.set(data.i, data.balance.get(data.i) + depositAmount); // update mainScreen balance
+                    data.balance.set(data.i, data.balance.get(data.i) + depositAmount);// update mainScreen balance
                     balanceLabel.setText("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
@@ -549,12 +620,12 @@ class DepositScreen extends JFrame implements ActionListener {
     }
 }
 
-class BalanceScreen extends JFrame {
+class balanceScreen extends JFrame {
     JLabel balanceLabel;
     NewScreen mainScreen;
     Data data = Data.getInstance();
 
-    public BalanceScreen(NewScreen mainScreen) {
+    public balanceScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
 
         setTitle("Check Balance");
@@ -569,18 +640,33 @@ class BalanceScreen extends JFrame {
     }
 }
 
-class HistoryScreen extends JFrame {
-    NewScreen mainScreen;
+class historyScreen extends JFrame {
+    JTextArea historyArea;
+    Data data = Data.getInstance();
 
-    public HistoryScreen(NewScreen mainScreen) {
-        this.mainScreen = mainScreen;
-
+    public historyScreen(NewScreen mainScreen) {
         setTitle("Transaction History");
-        setSize(300, 200);
+        setLayout(new BorderLayout());
+
+        historyArea = new JTextArea(20, 30);
+        historyArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(historyArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        updateHistory();
+
+        setSize(400, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
     }
-}
 
+    private void updateHistory() {
+        StringBuilder historyText = new StringBuilder();
+        for (String transaction : data.transactionHistory) {
+            historyText.append(transaction).append("\n");
+        }
+        historyArea.setText(historyText.toString());
+    }
+}
     
 
