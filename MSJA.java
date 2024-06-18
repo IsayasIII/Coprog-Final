@@ -11,8 +11,10 @@ import java.util.HashMap;
 import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.PrintWriter;
+import java.util.Date;
 
-public class MSJA {
+public class MSJA1 {
     public static void main(String[] args) {
         new MS();
     }
@@ -25,7 +27,7 @@ class Data {
     ArrayList<String> pins = new ArrayList<>();
     ArrayList<String> choice = new ArrayList<>();
     ArrayList<Double> balance = new ArrayList<>();
-    ArrayList<String> transactionHistory = new ArrayList<>();
+    HashMap<Integer, ArrayList<String>> transactionHistory = new HashMap<>();
 
     private Data() {
         // Private constructor to enforce Singleton pattern
@@ -115,12 +117,52 @@ public void readFile() {
     }
 }
 
+private static final String TRANSACTION_HISTORY_FILE = "transaction_history.txt";
+
+    public void saveTransactionHistory() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(TRANSACTION_HISTORY_FILE))) {
+            for (int i = 0; i < names.size(); i++) {
+                writer.println("User " + i + ":");
+                for (String transaction : transactionHistory.get(i)) {
+                    writer.println(transaction);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error saving transaction history: " + e.getMessage());
+        }
+    }
+
+    public void loadTransactionHistory() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(TRANSACTION_HISTORY_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("User ")) {
+                    int userId = Integer.parseInt(line.substring(5));
+                    transactionHistory.put(userId, new ArrayList<>());
+                } else {
+                    int userId = Integer.parseInt(line.substring(5));
+                    transactionHistory.get(userId).add(line);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error loading transaction history: " + e.getMessage());
+        }
+    }
+
     public void addAcc(String fullName, String pin, String choice) {
         names.add(fullName);
         pins.add(pin);
         balance.add(0.0);
         this.choice.add(choice);
         i = names.size() - 1;
+        transactionHistory.put(i, new ArrayList<>()); // Initialize transaction history for new user
+    }
+    public void logTransaction(int userId, String transaction) {
+        transactionHistory.get(userId).add(transaction);
+    }
+
+    public ArrayList<String> getTransactionHistory(int userId) {
+        return transactionHistory.get(userId);
     }
 }
 
@@ -562,7 +604,13 @@ class WithdrawScreen extends JFrame implements ActionListener {
                 } else {
                     balance -= withdrawAmount;
                     balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
-                    data.balance.set(data.i,balance); // update mainScreen balance
+                    data.balance.set(data.i, balance); // update mainScreen balance
+
+                    // Log transaction history with time and date
+                    Date date = new Date();
+                    String transaction = date.toString() + " - Withdrawal: -$" + String.format("%.2f", withdrawAmount);
+                    data.logTransaction(data.i, transaction);
+
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
                 }
@@ -572,6 +620,7 @@ class WithdrawScreen extends JFrame implements ActionListener {
         }
     }
 }
+
 class depositScreen extends JFrame implements ActionListener {
     JLabel balanceLabel;
     JButton depositButton;
@@ -610,6 +659,12 @@ class depositScreen extends JFrame implements ActionListener {
                 } else {
                     data.balance.set(data.i, data.balance.get(data.i) + depositAmount);// update mainScreen balance
                     balanceLabel.setText("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
+
+                    // Log transaction history with time and date
+                    Date date = new Date();
+                    String transaction = date.toString() + " - Deposit: +$" + String.format("%.2f", depositAmount);
+                    data.logTransaction(data.i, transaction);
+
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
                 }
@@ -634,6 +689,13 @@ class balanceScreen extends JFrame {
         balanceLabel = new JLabel("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
         add(balanceLabel);
 
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> {
+            dispose();
+            mainScreen.setVisible(true);
+        });
+        add(closeButton);
+
         setSize(300, 100);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
@@ -643,8 +705,11 @@ class balanceScreen extends JFrame {
 class historyScreen extends JFrame {
     JTextArea historyArea;
     Data data = Data.getInstance();
+    NewScreen mainScreen;
 
     public historyScreen(NewScreen mainScreen) {
+        this.mainScreen = mainScreen;
+
         setTitle("Transaction History");
         setLayout(new BorderLayout());
 
@@ -662,7 +727,8 @@ class historyScreen extends JFrame {
 
     private void updateHistory() {
         StringBuilder historyText = new StringBuilder();
-        for (String transaction : data.transactionHistory) {
+        ArrayList<String> transactionHistory = data.getTransactionHistory(data.i);
+        for (String transaction : transactionHistory) {
             historyText.append(transaction).append("\n");
         }
         historyArea.setText(historyText.toString());
