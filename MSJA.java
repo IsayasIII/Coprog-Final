@@ -998,7 +998,7 @@ class SettingScreen extends JFrame implements ActionListener {
     JPanel bg;
     Data data;
 
-    public SettingScreen(NewScreen setting, String fullName) {
+    public SettingScreen(NewScreen mainScreen, String fullName) {
         this.setting = setting;
         this.fullName = fullName;
         
