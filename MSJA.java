@@ -14,7 +14,7 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.Date;
 
-public class MSJA1 {
+public class MSJA {
     public static void main(String[] args) {
         new MS();
     }
@@ -191,7 +191,7 @@ class MS extends JFrame implements ActionListener {
     JPanel backgroundPanel;
     private static HashMap<String, String> accounts = new HashMap<>();
     Data data = Data.getInstance();
-
+    
     public MS() {
         // Custom panel for background
         backgroundPanel = new JPanel() {
@@ -301,6 +301,7 @@ class MS extends JFrame implements ActionListener {
         data.readFile();
         data.loadTransactionHistory();
     }
+
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == loginButton) {
@@ -419,12 +420,12 @@ class Screen extends JFrame implements ActionListener {
         gbc.gridy = 3;
         background.add(phoneNumberField, gbc);
 
-        choiceLabel = new JLabel("Choose Verification Method:");
+        choiceLabel = new JLabel("Gender:");
         gbc.gridx = 0;
         gbc.gridy = 4;
         background.add(choiceLabel, gbc);
 
-        choiceBox = new JComboBox<>(new String[] { "Email", "Phone" });
+        choiceBox = new JComboBox<>(new String[] { "", "Female","Male" });
         gbc.gridx = 1;
         gbc.gridy = 4;
         background.add(choiceBox, gbc);
@@ -498,28 +499,40 @@ class Screen extends JFrame implements ActionListener {
 }
 
 class NewScreen extends JFrame implements ActionListener {
-    MS login;
+     MS login;
     String fullName;
     String choice;
     JButton withdrawButton, depositButton, balanceButton, historyButton, settingButton;
-
+    JPanel bg;
     public NewScreen(MS login, String fullName, String choice) {
         this.login = login;
         this.fullName = fullName;
         this.choice = choice;
 
+        bg = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Load background image
+                Image img = new ImageIcon("va.jpg").getImage();
+                // Draw image at the specified location
+                g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
         setTitle("Logged In");
-        setLayout(new GridBagLayout());
+        bg.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.CENTER;
+        setContentPane(bg);
 
         // Withdraw Button
         withdrawButton = new JButton("Withdraw");
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.gridwidth = 2; // Span across two columns
-        add(withdrawButton, gbc);
+        gbc.gridwidth = 2; // Single column
+        bg.add(withdrawButton, gbc);
         withdrawButton.addActionListener(this);
         withdrawButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -535,8 +548,8 @@ class NewScreen extends JFrame implements ActionListener {
         depositButton = new JButton("Deposit");
         gbc.gridx = 1;
         gbc.gridy = 1;
-        gbc.gridwidth = 2; // Span across two columns
-        add(depositButton, gbc);
+        gbc.gridwidth = 2; // Single column
+        bg.add(depositButton, gbc);
         depositButton.addActionListener(this);
         depositButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -553,7 +566,7 @@ class NewScreen extends JFrame implements ActionListener {
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 1; // Single column
-        add(balanceButton, gbc);
+        bg.add(balanceButton, gbc);
         balanceButton.addActionListener(this);
         balanceButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -570,7 +583,7 @@ class NewScreen extends JFrame implements ActionListener {
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.gridwidth = 1; // Single column
-        add(historyButton, gbc);
+        bg.add(historyButton, gbc);
         historyButton.addActionListener(this);
         historyButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -587,7 +600,7 @@ class NewScreen extends JFrame implements ActionListener {
         gbc.gridx = 2;
         gbc.gridy = 2;
         gbc.gridwidth = 1; // Single column
-        add(settingButton, gbc);
+        bg.add(settingButton, gbc);
         settingButton.addActionListener(this);
         settingButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -635,14 +648,28 @@ class WithdrawScreen extends JFrame implements ActionListener {
     double balance = 0.0;
     NewScreen mainScreen;
     Data data = Data.getInstance();
-
+    
+    JPanel background;
+    
     public WithdrawScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
-        this.balance = data.balance.get(data.i); // inherit balance from mainScreen
-
+        this.balance = data.balance.get(data.i); // inherit balance from mainScreen'
+        
+        background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Load background image
+                Image img = new ImageIcon("bc.jpg").getImage();
+                // Draw image at the specified location
+                g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        
         setTitle("Withdraw Cash");
-        setLayout(new GridBagLayout()); // Use GridBagLayout for centering components
-
+        background.setLayout(new GridBagLayout()); // Use GridBagLayout for centering components
+          setContentPane(background);
+          
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.CENTER;
@@ -650,19 +677,29 @@ class WithdrawScreen extends JFrame implements ActionListener {
         balanceLabel = new JLabel("Balance: $" + String.format("%.2f", balance));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        add(balanceLabel, gbc);
+        background.add(balanceLabel, gbc);
 
         withdrawAmountField = new JTextField(10);
         gbc.gridx = 0;
         gbc.gridy = 1;
-        add(withdrawAmountField, gbc);
+        background.add(withdrawAmountField, gbc);
 
         withdrawButton = new JButton("Withdraw");
         withdrawButton.addActionListener(this);
         gbc.gridx = 0;
         gbc.gridy = 2;
-        add(withdrawButton, gbc);
+        background.add(withdrawButton, gbc);
+        
+         withdrawButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+        withdrawButton.setBackground(Color.cyan); // Change to highlight color
+            }
 
+            public void mouseExited(MouseEvent e) {
+                withdrawButton.setBackground(null); // Change back to default color
+            }
+        });
+        
         backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -671,8 +708,18 @@ class WithdrawScreen extends JFrame implements ActionListener {
                 mainScreen.setVisible(true); // Show the NewScreen
             }
         });
+        
+         backButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+        backButton.setBackground(Color.cyan); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+              backButton.setBackground(null); // Change back to default color
+            }
+        });
         gbc.gridy = 3;
-        add(backButton, gbc);
+        background.add(backButton, gbc);
 
         setSize(300, 200);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -717,13 +764,26 @@ class depositScreen extends JFrame implements ActionListener {
     JTextField depositAmountField;
     NewScreen mainScreen;
     Data data = Data.getInstance();
-
+    
+    JPanel background;
     public depositScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
-
+        
+        background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Load background image
+                Image img = new ImageIcon("bc.jpg").getImage();
+                // Draw image at the specified location
+                g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        
         setTitle("Deposit Cash");
-        setLayout(new GridBagLayout()); // Use GridBagLayout for centering components
-
+        background.setLayout(new GridBagLayout()); // Use GridBagLayout for centering components
+         setContentPane(background);
+         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.CENTER;
@@ -731,19 +791,30 @@ class depositScreen extends JFrame implements ActionListener {
         balanceLabel = new JLabel("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        add(balanceLabel, gbc);
+        background.add(balanceLabel, gbc);
 
         depositAmountField = new JTextField(10);
         gbc.gridx = 0;
         gbc.gridy = 1;
-        add(depositAmountField, gbc);
+       background.add(depositAmountField, gbc);
 
         depositButton = new JButton("Deposit");
         gbc.gridx = 0;
         gbc.gridy = 2;
-        add(depositButton, gbc);
+        background.add(depositButton, gbc);
         depositButton.addActionListener(this);
 
+          depositButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+             depositButton.setBackground(Color.cyan); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                depositButton.setBackground(null); // Change back to default color
+            }
+        });
+        
+          
         backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -752,8 +823,20 @@ class depositScreen extends JFrame implements ActionListener {
                 mainScreen.setVisible(true); // Show the NewScreen
             }
         });
+        
+          backButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+              backButton.setBackground(Color.cyan); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(null); // Change back to default color
+            }
+        });
+        
+          
         gbc.gridy = 3;
-        add(backButton, gbc);
+        background.add(backButton, gbc);
 
         setSize(300, 200);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -794,13 +877,25 @@ class balanceScreen extends JFrame {
     JButton backButton;
     NewScreen mainScreen;
     Data data = Data.getInstance();
-
+    
+    JPanel background;
     public balanceScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
-
+        
+         background = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Load background image
+                Image img = new ImageIcon("bc.jpg").getImage();
+                // Draw image at the specified location
+                g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+         
         setTitle("Check Balance");
-        setLayout(new GridBagLayout()); // Use GridBagLayout for centering components
-
+        background.setLayout(new GridBagLayout()); // Use GridBagLayout for centering components
+         setContentPane(background);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.CENTER;
@@ -810,7 +905,7 @@ class balanceScreen extends JFrame {
         balanceLabel.setFont(new Font("Arial", Font.BOLD, 18)); // Example of setting font
         gbc.gridx = 0;
         gbc.gridy = 0;
-        add(balanceLabel, gbc);
+        background.add(balanceLabel, gbc);
 
         backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
@@ -820,6 +915,17 @@ class balanceScreen extends JFrame {
                 mainScreen.setVisible(true); // Show the NewScreen
             }
         });
+        
+          backButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+              backButton.setBackground(Color.cyan); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(null); // Change back to default color
+            }
+        });
+        
         gbc.gridy = 1;
         add(backButton, gbc);
 
@@ -835,17 +941,17 @@ class historyScreen extends JFrame {
     Data data = Data.getInstance();
     NewScreen mainScreen;
     JButton backButton;
-
+     
     public historyScreen(NewScreen mainScreen) {
         this.mainScreen = mainScreen;
-
+       
         setTitle("Transaction History");
-        setLayout(new BorderLayout());
-
+       setLayout(new BorderLayout());
+        
         historyArea = new JTextArea(20, 30);
         historyArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(historyArea);
-        add(scrollPane, BorderLayout.CENTER);
+    add(scrollPane, BorderLayout.CENTER);
         backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -854,9 +960,19 @@ class historyScreen extends JFrame {
                 mainScreen.setVisible(true); // Show the NewScreen
             }
         });
+        
+        backButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+              backButton.setBackground(Color.cyan); // Change to highlight color
+            }
 
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(null); // Change back to default color
+            }
+        });
+        
         updateHistory();
-        add(backButton, BorderLayout.SOUTH);
+       add(backButton, BorderLayout.SOUTH);
 
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -876,48 +992,99 @@ class historyScreen extends JFrame {
 class SettingScreen extends JFrame implements ActionListener {
 
     private NewScreen setting;
-    private JButton changeNameButton, changePinButton, logoutButton;
+    private JButton changeNameButton, changePinButton, logoutButton,backButton;
     private JLabel welcomeLabel;
     private String fullName;
-
+    JPanel bg;
     Data data;
 
     public SettingScreen(NewScreen setting, String fullName) {
         this.setting = setting;
         this.fullName = fullName;
-
+        
+        bg = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                // Load background image
+                Image img = new ImageIcon("va.jpg").getImage();
+                // Draw image at the specified location
+                g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        
         data = Data.getInstance();
         setTitle("Settings");
-        setLayout(new GridBagLayout());
+        bg.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.CENTER;
-
-        welcomeLabel = new JLabel("Welcome " + fullName, JLabel.CENTER);
+        setContentPane(bg);
+        
+        welcomeLabel = new JLabel( fullName, JLabel.CENTER);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 16));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        add(welcomeLabel, gbc);
+       bg.add(welcomeLabel, gbc);
 
         changeNameButton = new JButton("Change Name");
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        add(changeNameButton, gbc);
+        
+        bg.add(changeNameButton, gbc);
         changeNameButton.addActionListener(this);
+         changeNameButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                 changeNameButton.setBackground(Color.cyan); // Change to highlight color
+            }
 
+            public void mouseExited(MouseEvent e) {
+                 changeNameButton.setBackground(null); // Change back to default color
+            }
+        });
+         
         changePinButton = new JButton("Change PIN");
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        add(changePinButton, gbc);
-        changePinButton.addActionListener(this);
-
-        logoutButton = new JButton("Logout");
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        add(logoutButton, gbc);
+        bg.add(changePinButton, gbc);
+        changePinButton.addActionListener(this);
+         changePinButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                 changePinButton.setBackground(Color.cyan); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                 changePinButton.setBackground(null); // Change back to default color
+            }
+        });
+
+         backButton = new JButton("Back");
+          gbc.gridx = 0;
+        gbc.gridy = 4;
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose(); // Close the historyScreen
+                mainScreen.setVisible(true); // Show the NewScreen
+            }
+        });
+        
+        backButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+              backButton.setBackground(Color.cyan); // Change to highlight color
+            }
+
+            public void mouseExited(MouseEvent e) {
+                backButton.setBackground(null); // Change back to default color
+            }
+        });
+         bg.add(backButton, gbc);
+        
+        logoutButton = new JButton("Logout");
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        bg.add(logoutButton, gbc);
         logoutButton.addActionListener(this);
         logoutButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
