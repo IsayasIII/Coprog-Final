@@ -3,6 +3,7 @@ package msja;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.Date;
 
-public class MSJA {
+public class MSJA1 {
     public static void main(String[] args) {
         new MS();
     }
@@ -27,6 +28,7 @@ class Data {
     ArrayList<String> choice = new ArrayList<>();
     ArrayList<Double> balance = new ArrayList<>();
     HashMap<Integer, ArrayList<String>> transactionHistory = new HashMap<>();
+    private static final String TRANSACTION_HISTORY_FILE = "transaction_history.txt";
 
     private Data() {
         // Private constructor to enforce Singleton pattern
@@ -38,6 +40,30 @@ class Data {
         }
         return instance;
     }
+
+    public void DBcheck_Create(){
+        File Data = new File("Data.txt");
+        File TH = new File (TRANSACTION_HISTORY_FILE);
+        
+        if (!Data.exists()) {
+            try {
+                Data.createNewFile();}
+
+            catch (IOException e) {
+                System.out.println("Error creating file");
+            }
+        }
+
+        if (!TH.exists()) {
+            try {
+                TH.createNewFile();}
+
+            catch (IOException e) {
+                System.out.println("Error creating file");
+            }
+        }
+
+    }        
 
     public void writeFile() {
         try (FileWriter writer = new FileWriter("Data.txt")) {
@@ -102,10 +128,9 @@ class Data {
             }
         } catch (IOException e) {
             System.err.println("Error reading from file: " + e.getMessage());
+            
         }
     }
-
-    private static final String TRANSACTION_HISTORY_FILE = "transaction_history.txt";
 
     public void saveTransactionHistory() {
         try (PrintWriter writer = new PrintWriter(new FileWriter(TRANSACTION_HISTORY_FILE))) {
@@ -137,6 +162,7 @@ class Data {
             }
         } catch (IOException e) {
             System.err.println("Error reading transaction history: " + e.getMessage());
+
         }
     }
 
@@ -271,6 +297,7 @@ class MS extends JFrame implements ActionListener {
             }
         });
         setVisible(true);
+        data.DBcheck_Create();
         data.readFile();
         data.loadTransactionHistory();
     }
