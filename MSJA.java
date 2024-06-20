@@ -185,15 +185,14 @@ class Data {
 }
 
 class MS extends JFrame implements ActionListener {
-    JLabel welcomeLabel, pinLabel;
+    JLabel welcomeLabel, pinLabel, createLabel;
     JPasswordField pinField;
-    JButton loginButton, clearButton, exitButton, createButton;
+    JButton loginButton, exitButton;
     JPanel backgroundPanel;
     private static HashMap<String, String> accounts = new HashMap<>();
     Data data = Data.getInstance();
     
     public MS() {
-        // Custom panel for background
         backgroundPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -238,8 +237,10 @@ class MS extends JFrame implements ActionListener {
         backgroundPanel.add(pinField, gbc);
 
         loginButton = new JButton("Login");
+        loginButton.setPreferredSize(new Dimension(200, 50)); // Set the size of the login button
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.gridwidth = 2; // Make the button span both columns
         backgroundPanel.add(loginButton, gbc);
         loginButton.addActionListener(this);
         loginButton.addMouseListener(new MouseAdapter() {
@@ -252,24 +253,10 @@ class MS extends JFrame implements ActionListener {
             }
         });
 
-        clearButton = new JButton("Clear");
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        backgroundPanel.add(clearButton, gbc);
-        clearButton.addActionListener(this);
-        clearButton.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                clearButton.setBackground(Color.cyan); // Change to highlight color
-            }
-
-            public void mouseExited(MouseEvent e) {
-                clearButton.setBackground(null); // Change back to default color
-            }
-        });
-
         exitButton = new JButton("Exit");
         gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2; // Make the button span both columns
         backgroundPanel.add(exitButton, gbc);
         exitButton.addActionListener(this);
         exitButton.addMouseListener(new MouseAdapter() {
@@ -282,26 +269,33 @@ class MS extends JFrame implements ActionListener {
             }
         });
 
-        createButton = new JButton("Create");
-        gbc.gridx = 1;
+        createLabel = new JLabel("<html><a href=''>Register</a></html>");
+        createLabel.setHorizontalAlignment(JLabel.CENTER);
+        gbc.gridx = 0;
         gbc.gridy = 3;
-        backgroundPanel.add(createButton, gbc);
-        createButton.addActionListener(this);
-        createButton.addMouseListener(new MouseAdapter() {
+        gbc.gridwidth = 2;
+        backgroundPanel.add(createLabel, gbc);
+        createLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        createLabel.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                new Screen(MS.this);
+                setVisible(false);
+            }
+
             public void mouseEntered(MouseEvent e) {
-                createButton.setBackground(Color.cyan); // Change to highlight color
+                createLabel.setForeground(Color.cyan); // Change to highlight color
             }
 
             public void mouseExited(MouseEvent e) {
-                createButton.setBackground(null); // Change back to default color
+                createLabel.setForeground(null); // Change back to default color
             }
         });
+
         setVisible(true);
         data.DBcheck_Create();
         data.readFile();
         data.loadTransactionHistory();
     }
-
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == loginButton) {
@@ -333,14 +327,11 @@ class MS extends JFrame implements ActionListener {
 
                 }
             }
-        } else if (e.getSource() == clearButton) {
-            pinField.setText("");
         } else if (e.getSource() == exitButton) {
-            System.exit(0);
-        } else if (e.getSource() == createButton) {
-            new Screen(this);
-            this.setVisible(false);
-        }
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            }
     }
 }
 
@@ -420,7 +411,7 @@ class Screen extends JFrame implements ActionListener {
         gbc.gridy = 3;
         background.add(phoneNumberField, gbc);
 
-        choiceLabel = new JLabel("Gender:");
+        choiceLabel = new JLabel("Sex:");
         gbc.gridx = 0;
         gbc.gridy = 4;
         background.add(choiceLabel, gbc);
@@ -652,9 +643,9 @@ class WithdrawScreen extends JFrame implements ActionListener {
     JPanel background;
     
     public WithdrawScreen(NewScreen mainScreen) {
-        this.mainScreen = mainScreen;
+       this.mainScreen = mainScreen;
         this.balance = data.balance.get(data.i); // inherit balance from mainScreen'
-        
+
         background = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -665,11 +656,11 @@ class WithdrawScreen extends JFrame implements ActionListener {
                 g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
             }
         };
-        
+
         setTitle("Withdraw Cash");
         background.setLayout(new GridBagLayout()); // Use GridBagLayout for centering components
-          setContentPane(background);
-          
+        setContentPane(background);
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.CENTER;
@@ -689,33 +680,33 @@ class WithdrawScreen extends JFrame implements ActionListener {
         gbc.gridx = 0;
         gbc.gridy = 2;
         background.add(withdrawButton, gbc);
-        
-         withdrawButton.addMouseListener(new MouseAdapter() {
+
+        withdrawButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-        withdrawButton.setBackground(Color.cyan); // Change to highlight color
+                withdrawButton.setBackground(Color.cyan); // Change to highlight color
             }
 
             public void mouseExited(MouseEvent e) {
                 withdrawButton.setBackground(null); // Change back to default color
             }
         });
-        
+
         backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose(); // Close the BalanceScreen
+                dispose(); // Close the WithdrawScreen
                 mainScreen.setVisible(true); // Show the NewScreen
             }
         });
-        
-         backButton.addMouseListener(new MouseAdapter() {
+
+        backButton.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-        backButton.setBackground(Color.cyan); // Change to highlight color
+                backButton.setBackground(Color.cyan); // Change to highlight color
             }
 
             public void mouseExited(MouseEvent e) {
-              backButton.setBackground(null); // Change back to default color
+                backButton.setBackground(null); // Change back to default color
             }
         });
         gbc.gridy = 3;
@@ -730,16 +721,22 @@ class WithdrawScreen extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == withdrawButton) {
-            try {
-                double withdrawAmount = Double.parseDouble(withdrawAmountField.getText());
-                if (withdrawAmount <= 0) {
-                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
-                } else if (withdrawAmount > balance) {
-                    JOptionPane.showMessageDialog(this, "Insufficient funds.");
-                } else {
+        try {
+            double withdrawAmount = Double.parseDouble(withdrawAmountField.getText());
+            if (withdrawAmount <= 0) {
+                JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
+            } else if (withdrawAmount > balance) {
+                JOptionPane.showMessageDialog(this, "Insufficient funds.");
+            } else {
+                // Show confirmation dialog
+                int option = JOptionPane.showConfirmDialog(this,
+                        String.format("Withdraw $%.2f from your balance?\nRemaining balance: $%.2f", withdrawAmount, balance),
+                        "Confirm Withdrawal", JOptionPane.YES_NO_OPTION);
+                
+                if (option == JOptionPane.YES_OPTION) {
                     balance -= withdrawAmount;
                     balanceLabel.setText("Balance: $" + String.format("%.2f", balance));
-                    data.balance.set(data.i, balance); // update mainScreen balance
+                    data.balance.set(data.i, balance);
                     data.writeFile();
 
                     // Log transaction history with time and date
@@ -748,15 +745,20 @@ class WithdrawScreen extends JFrame implements ActionListener {
                     data.logTransaction(data.i, transaction);
                     data.saveTransactionHistory();
 
+                    // Show confirmation dialog with the formatted message
+                    JOptionPane.showMessageDialog(this, String.format("Withdrawal of $%.2f from your balance.\nRemaining balance: $%.2f", withdrawAmount, balance));
+
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
                 }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
             }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
         }
     }
 }
+}
+
 
 class depositScreen extends JFrame implements ActionListener {
     JLabel balanceLabel;
@@ -847,12 +849,18 @@ class depositScreen extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == depositButton) {
-            try {
-                double depositAmount = Double.parseDouble(depositAmountField.getText());
-                if (depositAmount <= 0) {
-                    JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
-                } else {
-                    data.balance.set(data.i, data.balance.get(data.i) + depositAmount); // update mainScreen balance
+        try {
+            double depositAmount = Double.parseDouble(depositAmountField.getText());
+            if (depositAmount <= 0) {
+                JOptionPane.showMessageDialog(this, "Invalid amount. Please enter a positive value.");
+            } else {
+                // Show confirmation dialog
+                int option = JOptionPane.showConfirmDialog(this,
+                        String.format("Deposit $%.2f to your balance?\nCurrent balance: $%.2f", depositAmount, data.balance.get(data.i)),
+                        "Confirm Deposit", JOptionPane.YES_NO_OPTION);
+                
+                if (option == JOptionPane.YES_OPTION) {
+                    data.balance.set(data.i, data.balance.get(data.i) + depositAmount);
                     balanceLabel.setText("Balance: $" + String.format("%.2f", data.balance.get(data.i)));
                     data.writeFile();
 
@@ -862,14 +870,18 @@ class depositScreen extends JFrame implements ActionListener {
                     data.logTransaction(data.i, transaction);
                     data.saveTransactionHistory();
 
+                    // Show confirmation dialog with the formatted message
+                    JOptionPane.showMessageDialog(this, String.format("Deposit of $%.2f added to your balance.\nNew balance: $%.2f", depositAmount, data.balance.get(data.i)));
+
                     this.dispose(); // close this window
                     mainScreen.setVisible(true); // show mainScreen
                 }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
             }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid amount.");
         }
     }
+}
 }
 
 class balanceScreen extends JFrame {
@@ -1059,7 +1071,7 @@ class SettingScreen extends JFrame implements ActionListener {
             }
         });
 
-         backButton = new JButton("Back");
+         backButton = new JButton("Home");
           gbc.gridx = 0;
         gbc.gridy = 4;
         backButton.addActionListener(new ActionListener() {
@@ -1137,10 +1149,14 @@ class SettingScreen extends JFrame implements ActionListener {
             } else {
                 JOptionPane.showMessageDialog(this, "Current PIN cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } else if (e.getSource() == logoutButton) {
-            new MS();
-            this.dispose();
+        }else if (e.getSource() == logoutButton) {
+        int choice = JOptionPane.showConfirmDialog(this, "Are you sure you want to logout?", "Confirm Logout", JOptionPane.YES_NO_OPTION);
+        
+        if (choice == JOptionPane.YES_OPTION) {
+            new MS();  // Assuming MS is your login screen or main screen
+            this.dispose();  // Dispose the current screen
         }
     }
-
+}
+}
 }
